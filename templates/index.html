@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pim Pam Pet / Ratefix Letter Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Hidden span to pass max_score_reached flag to JavaScript -->
+    <span id="max-score-reached" style="display: none;">{{ max_score_reached | tojson }}</span>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>Pim Pam Pet / Ratefix Letter Generator</h1>
+            <div id="timer" class="timer">30</div>
+        </header>
+        <main class="game-main">
+            <!-- Game Controls and Player Scores Side by Side -->
+            <div class="game-sections">
+                <!-- Game Controls -->
+                <div class="controls-section">
+                    <div id="letter" class="letter-display">{{ letter }}</div>
+                    {% if random_category %}
+                        <div class="category-label">Random Category:</div>
+                        <div class="category-name">{{ random_category }}</div>
+                        {% for lang, cat in translated_categories.items() %}
+                            <div class="category-label">{{ lang }}:</div>
+                            <div class="category-name">{{ cat }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <form id="new-letter-form" action="/" method="post">
+                        <div class="language-select">
+                            <!-- Language checkboxes -->
+                            {% for lang in languages %}
+                                <label class="language-option">
+                                    <input type="checkbox" name="languages" value="{{ lang }}"{{ ' checked' if lang in selected_languages }}> {{ lang }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                        <label class="random-category">
+                            <input type="checkbox" name="random_category" {{ ' checked' if random_category_checkbox }}> Select Random Category
+                        </label>
+                        <input type="hidden" name="new_letter" value="1">
+                        <button type="submit" class="btn">Get New Letter</button>
+                    </form>
+                </div>
+                <!-- Player Scores -->
+                <div class="player-scores-section">
+                    <h2>Players and Scores:</h2>
+                    <ul>
+                        <!-- Player scores -->
+                        {% for player, score in players.items() %}
+                            <li class="player-score">
+                                {{ player }}: {{ score }}
+                                <div class="score-controls">
+                                    <a href="/update_score/{{ player }}?score=1" class="score-btn">+1</a>
+                                    <a href="/update_score/{{ player }}?score=-1" class="score-btn">-1</a>
+                                    <a href="/reset_player_score/{{ player }}" class="score-btn">Reset</a>
+                                    <a href="/remove_player/{{ player }}" class="score-btn">Remove</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="score-controls">
+                        <a href="/reset_scores" class="score-btn">Reset All Scores</a>
+                    </div>
+                    <form action="/add_player" method="post" class="add-player-form">
+                        <input type="text" name="player_name" placeholder="Enter player name" class="player-input">
+                        <button type="submit" class="btn">Add Player</button>
+                    </form>
+                </div>
+            </div>
+            <div id="celebration-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span id="close-modal" class="close">&times;</span>
+                    <img src="{{ url_for('static', filename='celebration.gif') }}" alt="Celebration!" class="celebration-gif">
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
